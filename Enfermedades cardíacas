@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Predicción de Enfermedades Cardíacas</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0"></script>
+</head>
+<body>
+  <h2>Predicción de Enfermedades Cardíacas</h2>
+  <p>Ingrese los siguientes datos clínicos:</p>
+  <label>Edad: <input id="edad" type="number"></label><br>
+  <label>Presión en reposo: <input id="presion" type="number"></label><br>
+  <label>Colesterol: <input id="colesterol" type="number"></label><br>
+  <label>Máxima frecuencia cardíaca: <input id="frecuencia" type="number"></label><br>
+  <button onclick="predecir()">Predecir</button>
+
+  <h3 id="resultado"></h3>
+
+  <script>
+    // Modelo simple de red neuronal
+    const model = tf.sequential();
+    model.add(tf.layers.dense({units: 8, activation: 'relu', inputShape: [4]}));
+    model.add(tf.layers.dense({units: 1, activation: 'sigmoid'}));
+    model.compile({optimizer: 'adam', loss: 'binaryCrossentropy', metrics: ['accuracy']});
+
+    // Datos de entrenamiento simulados (por ejemplo únicamente)
+    const xs = tf.tensor2d([
+      [50, 130, 250, 150],
+      [60, 140, 280, 120],
+      [45, 120, 230, 160],
+      [70, 150, 300, 100]
+    ]);
+    const ys = tf.tensor2d([[1], [1], [0], [1]]);
+
+    async function entrenarModelo() {
+      await model.fit(xs, ys, {epochs: 100});
+      console.log("Entrenamiento completo");
+    }
+
+    entrenarModelo();
+
+    async function predecir() {
+      const edad = parseFloat(document.getElementById('edad').value);
+      const presion = parseFloat(document.getElementById('presion').value);
+      const colesterol = parseFloat(document.getElementById('colesterol').value);
+      const frecuencia = parseFloat(document.getElementById('frecuencia').value);
+
+      const input = tf.tensor2d([[edad, presion, colesterol, frecuencia]]);
+      const resultado = model.predict(input);
+      const valor = await resultado.data();
+
+      document.getElementById('resultado').innerText =
+        valor[0] > 0.5 ? "Riesgo de enfermedad cardíaca detectado." : "Sin riesgo significativo detectado.";
+    }
+  </script>
+</body>
+</html>
